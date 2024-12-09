@@ -1,10 +1,10 @@
 #include <Arduino.h>
-#include "STM32_CAN.h"
-#include <IbusTrx.h>
+#include "CANbus.h"
+#include <Ibus.h>
 
 // Инициализация классов:
-IbusTrx ibus;
-STM32_CAN can(CAN1, DEF, RX_SIZE_64, TX_SIZE_64); // PA11 - CRX / PA12 - CTX
+Ibus ibus;
+CANbus can(CAN1, DEF, RX_SIZE_64, TX_SIZE_64); // PA11 - CRX / PA12 - CTX
 
 // Определение функций и переменных:
 static CAN_message_t canRxMessage;
