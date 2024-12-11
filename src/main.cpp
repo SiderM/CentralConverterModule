@@ -11,9 +11,10 @@ static CAN_message_t canRxMessage;
 static CAN_message_t canTxMessage;
 void resetCanMessage();
 void canRead();
-void ibusSniffer();
 void ibusFiltered();
 void initTimers();
+
+char output[50] = {};
 
 void setup()
 {
@@ -37,7 +38,6 @@ void setup()
 void loop()
 {
   // Рабочий цикл:
-  // ibusSniffer();
   ibusFiltered();
 }
 
@@ -93,76 +93,19 @@ void canRead()
   }
 }
 
-void ibusSniffer()
-{
-  if (ibus.available())
-  {
-    IbusMessage ibusRxMessage = ibus.readMessage();
-
-    Serial1.print("Source: ");
-    Serial1.print("0x");
-    Serial1.print(ibusRxMessage.source(), HEX);
-    Serial1.print(" Length: ");
-    Serial1.print("0x");
-    Serial1.print(ibusRxMessage.length(), HEX);
-    Serial1.print(" Destination: ");
-    Serial1.print("0x");
-    Serial1.print(ibusRxMessage.destination(), HEX);
-    Serial1.print(" Payload:");
-    for (int i = 0; i < ibusRxMessage.length() - 1; i++)
-    {
-      Serial1.print(" 0x");
-      Serial1.print(ibusRxMessage.b(i), HEX);
-    }
-    Serial1.print(" CRC");
-    Serial1.println();
-  }
-}
-
 void ibusFiltered()
 {
   if (ibus.available())
   {
     IbusMessage ibusRxMessage = ibus.readMessage();
 
-    if (ibusRxMessage.b(0) == 0x7a)
+    // 0x11 Ignition
+    // 0x13 Sensors
+
+    if (ibusRxMessage.b(0) == 0x13)
     {
-      Serial1.println("Doors/LID Message");
-      Serial1.print("Length: ");
-      Serial1.print(ibusRxMessage.length());
-      Serial1.print(" DATA:");
-      for (int i = 0; i < ibusRxMessage.length() - 1; i++)
-      {
-        Serial1.print(" 0x");
-        Serial1.print(ibusRxMessage.b(i), HEX);
-      }
-      Serial1.println();
-    }
-    else if (ibusRxMessage.b(0) == 0x19)
-    {
-      Serial1.println("Temperature Message");
-      Serial1.print("Length: ");
-      Serial1.print(ibusRxMessage.length());
-      Serial1.print(" DATA:");
-      for (int i = 0; i < ibusRxMessage.length() - 1; i++)
-      {
-        Serial1.print(" 0x");
-        Serial1.print(ibusRxMessage.b(i), HEX);
-      }
-      Serial1.println();
-    }
-    else if (ibusRxMessage.b(0) == 0x11)
-    {
-      Serial1.println("Ignition Message");
-      Serial1.print("Length: ");
-      Serial1.print(ibusRxMessage.length());
-      Serial1.print(" DATA:");
-      for (int i = 0; i < ibusRxMessage.length() - 1; i++)
-      {
-        Serial1.print(" 0x");
-        Serial1.print(ibusRxMessage.b(i), HEX);
-      }
-      Serial1.println();
+      sprintf(output, "gear: 0x%x", ibusRxMessage.b(2));
+      Serial1.println(output);
     }
   }
 }
